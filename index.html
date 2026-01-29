@@ -7,25 +7,46 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --brand-red: #C8102E;
-            --brand-red-dark: #A00D25;
-            --brand-yellow: #FFC107;
-            --bg-color: #F9F7F2;
+            /* 壽司郎品牌色系 */
+            --brand-red: #C8102E;       
+            --brand-red-dark: #A00D25;  
+            --brand-yellow: #FFC107;    
+            --bg-color: #F9F7F2;        
             --card-bg: #FFFFFF;
             --text-main: #2D2D2D;
             --text-sub: #666666;
             
+            /* 功能色 */
             --whatsapp-green: #25D366;
-            --timer-blue: #0055A4;
+            --timer-blue: #0055A4;      
             --timer-orange: #FF9500;
             
+            /* 碟色 */
             --plate-red: #D9381E;
             --plate-silver: #A8A9AD;
             --plate-gold: #EDAC28;
             --plate-black: #222222;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Noto Sans TC', sans-serif; }
+        /* 全域設定：禁止選取文字 */
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            font-family: 'Noto Sans TC', sans-serif;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE */
+            user-select: none;         /* Standard */
+            touch-action: manipulation; /* 優化觸控，防止雙擊縮放 */
+        }
+        
+        /* 例外：輸入框必須可以選取文字以便編輯 */
+        input {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
         
         body {
             background-color: var(--bg-color);
