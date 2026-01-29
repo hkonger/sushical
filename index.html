@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>壽司郎費用計算機</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-red: #C8102E;
+            --brand-dark: #2D2D2D;
+            --bg-color: #F5F5F7;
+            --card-bg: #FFFFFF;
+            --whatsapp-green: #25D366;
+            --plate-red: #D32F2F;
+            --plate-silver: #9E9E9E;
+            --plate-gold: #FBC02D;
+            --plate-black: #212121;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--brand-dark);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        .scroll-container {
+            flex: 1; overflow-y: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--card-bg); padding: 12px 20px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 90;
+            border-bottom: 4px solid var(--brand-red);
+            display: flex; align-items: center; justify-content: center;
+        }
+        header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--brand-red); }
+
+        .header-btn {
+            position: absolute; font-size: 0.8rem; text-decoration: none;
+            color: var(--brand-red); font-weight: 700; border: 1px solid var(--brand-red);
+            padding: 4px 10px; border-radius: 20px; background: white; transition: 0.2s; cursor: pointer;
+        }
+        .header-btn:active { background: #fff5f5; transform: scale(0.95); }
+        .menu-link { left: 15px; }
+        .disclaimer-link { right: 15px; color: #666; border-color: #999; }
+
+        .content-wrapper { max-width: 600px; margin: 0 auto; padding: 15px; }
+
+        /* FLOATING RESET BUTTON */
+        .floating-reset-btn {
+            position: fixed;
+            bottom: 140px; /* Above the footer area */
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent */
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; cursor: pointer; z-index: 999;
+            backdrop-filter: blur(5px); /* Blur effect */
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden; white-space: nowrap;
+        }
+        
+        /* Confirm State */
+        .floating-reset-btn.confirm {
+            background-color: rgba(200, 16, 46, 0.95); /* Solid Red */
+            color: white;
+            width: 110px; /* Expand width */
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            animation: shake 0.3s;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); } 25% { transform: translateX(2px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); }
+        }
+
+        /* STANDARD PLATES GRID */
+        #plate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+
+        /* CUSTOM ITEMS GRID */
+        #custom-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+
+        /* PLATE CARD */
+        .plate-card {
+            background: var(--card-bg); border-radius: 12px; padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03); border: 1px solid transparent;
+            display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
+            cursor: pointer; transition: transform 0.1s;
+        }
+        .plate-card:active { transform: scale(0.97); background-color: #fafafa; }
+        .plate-red { border-left: 4px solid var(--plate-red); }
+        .plate-silver { border-left: 4px solid var(--plate-silver); }
+        .plate-gold { border-left: 4px solid var(--plate-gold); }
+        .plate-black { border-left: 4px solid var(--plate-black); }
+
+        .plate-top { display: flex; align-items: center; width: 100%; gap: 10px; pointer-events: none; }
+        .plate-icon {
+            width: 32px; height: 32px; border-radius: 50%; background: white; flex-shrink: 0;
+            border: 4px solid #ccc; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); position: relative;
+        }
+        .plate-icon::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 60%; height: 60%;
+            border-radius: 50%; border: 1px solid rgba(0,0,0,0.1);
+        }
+        .plate-red .plate-icon { border-color: var(--plate-red); }
+        .plate-silver .plate-icon { border-color: var(--plate-silver); }
+        .plate-gold .plate-icon { border-color: var(--plate-gold); }
+        .plate-black .plate-icon { border-color: var(--plate-black); }
+
+        .plate-info { text-align: left; line-height: 1.2; }
+        .plate-name { font-weight: 700; font-size: 0.95rem; }
+        .plate-price { font-size: 0.85rem; color: #666; font-weight: 500; }
+
+        .qty-control {
+            display: flex; align-items: center; background: #F0F0F0;
+            border-radius: 20px; padding: 2px; width: 100%; justify-content: space-between;
+        }
+        .qty-btn {
+            width: 28px; height: 28px; border: none; background: white;
+            border-radius: 50%; font-size: 1.1rem; color: var(--brand-red);
+            font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center; padding: 0;
+        }
+        .qty-btn:active { background: #eee; }
+        .qty-input {
+            width: 30px; text-align: center; background: transparent; border: none;
+            font-size: 1.1rem; font-weight: 700; color: var(--brand-dark); padding: 0;
+        }
+
+        /* CUSTOM CARD */
+        .custom-card {
+            background: white; border-radius: 10px; padding: 6px; border: 1px solid #eee;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03); 
+            display: flex; flex-direction: column; gap: 4px; 
+            animation: popIn 0.3s; transition: background-color 0.2s;
+        }
+        .custom-card.highlight { background-color: #fff9c4; border-color: #fbc02d; }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .custom-header { display: flex; justify-content: space-between; align-items: center; height: 20px;}
+        .category-select {
+            border: none; background: transparent; font-size: 0.75rem; 
+            font-weight: 700; color: var(--brand-red); width: 85%;
+            padding: 0; outline: none; -webkit-appearance: none;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .custom-price-input { 
+            width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 2px; 
+            text-align: center; font-weight: 700; font-size: 0.95rem; color: #333;
+        }
+        .custom-card .qty-control { height: 26px; border-radius: 13px; }
+        .custom-card .qty-btn { width: 22px; height: 22px; font-size: 0.9rem; }
+        .custom-card .qty-input { font-size: 0.95rem; width: 24px; }
+        .delete-x { font-size: 1.2rem; line-height: 1; color: #ccc; cursor: pointer; padding-left: 2px;}
+        .delete-x:hover { color: red; }
+
+        /* PRESET CHIPS */
+        .preset-title { font-size: 0.85rem; color: #888; font-weight: 700; margin: 20px 0 8px 5px; }
+        .preset-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 25px;
+        }
+        .preset-btn {
+            background: white; border: 1px solid #ddd; border-radius: 6px; padding: 8px 0;
+            text-align: center; font-weight: 700; color: #555; font-size: 0.9rem;
+            cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.1s;
+        }
+        .preset-btn:active { background: #ffebee; border-color: var(--brand-red); color: var(--brand-red); transform: scale(0.95); }
+
+        .add-btn-container {
+            border: 2px dashed #ccc; border-radius: 12px; padding: 12px;
+            text-align: center; color: #888; font-weight: 600; cursor: pointer;
+            margin-top: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.5); transition: 0.2s; font-size: 0.9rem;
+        }
+        .add-btn-container:active { background: #eee; transform: scale(0.98); }
+
+        /* SETTINGS */
+        .settings-area { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--brand-red); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        /* FIXED FOOTER */
+        .fixed-footer {
+            flex-shrink: 0; background: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            padding: 12px 20px; border-top: 1px solid #eee; z-index: 100;
+        }
+        .bill-summary { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+        .bill-left { font-size: 0.85rem; color: #666; display: flex; flex-direction: column; gap: 2px; }
+        .bill-right { text-align: right; }
+        .bill-total { font-size: 1.4rem; font-weight: 800; color: var(--brand-red); line-height: 1.1; }
+        .bill-aa { font-size: 0.95rem; font-weight: 600; color: var(--brand-dark); margin-top: 4px; }
+        .stats-badge { display: inline-block; background: #eee; color: #555; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; margin-bottom: 3px; }
+
+        .whatsapp-btn {
+            width: 100%; background-color: var(--whatsapp-green); color: white;
+            border: none; padding: 12px; border-radius: 50px; font-size: 1rem;
+            font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 2000;
+            display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;
+        }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content { background: white; width: 85%; max-width: 400px; border-radius: 16px; padding: 25px; position: relative; }
+        .modal-close-x { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: #999; cursor: pointer; }
+        .disclaimer-text { font-size: 0.9rem; line-height: 1.6; color: #444; margin-bottom: 15px; }
+        .disclaimer-text h3 { color: var(--brand-red); margin-top: 0; }
+        .disclaimer-text ul { padding-left: 20px; margin-bottom: 0; }
+        .disclaimer-text li { margin-bottom: 8px; }
+
+        /* TOAST */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center;
+            border-radius: 50px; padding: 12px; position: fixed; z-index: 9999;
+            left: 50%; bottom: 120px; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-weight: 500;
+        }
+        #toast.show { visibility: visible; opacity: 1; }
+    </style>
+</head>
+<body>
+
+<!-- FLOATING RESET BUTTON -->
+<div class="floating-reset-btn" onclick="handleReset()">
+    <span id="reset-icon">🔄</span>
+    <span id="reset-text" style="display:none; margin-left:5px;">確定清空?</span>
+</div>
+
+<!-- TOAST Notification -->
+<div id="toast">請先點餐！🍣</div>
+
+<div class="scroll-container">
+    <header>
+        <a href="https://sushirohk.com.hk/tc/menu.php?wid=5&cid=13" target="_blank" class="header-btn menu-link">📝 菜單</a>
+        <h1>🍣 SUSHIRO 計算機</h1>
+        <div class="header-btn disclaimer-link" onclick="openDisclaimer()">⚠️ 免責</div>
+    </header>
+
+    <div class="content-wrapper">
+        <!-- Standard Plates -->
+        <div id="plate-grid"></div>
+
+        <!-- Price Presets -->
+        <div class="preset-title">快速加入餐點</div>
+        <div class="preset-grid">
+            <button class="preset-btn" onclick="addCustomItem(10)">$10</button>
+            <button class="preset-btn" onclick="addCustomItem(13)">$13</button>
+            <button class="preset-btn" onclick="addCustomItem(18)">$18</button>
+            <button class="preset-btn" onclick="addCustomItem(19)">$19</button>
+            <button class="preset-btn" onclick="addCustomItem(20)">$20</button>
+            <button class="preset-btn" onclick="addCustomItem(27)">$27</button>
+            <button class="preset-btn" onclick="addCustomItem(28)">$28</button>
+            <button class="preset-btn" onclick="addCustomItem(32)">$32</button>
+            <button class="preset-btn" onclick="addCustomItem(33)">$33</button>
+            <button class="preset-btn" onclick="addCustomItem(39)">$39</button>
+        </div>
+
+        <!-- Custom Items Container -->
+        <div id="custom-grid"></div>
+
+        <!-- Manual Add Button -->
+        <div class="add-btn-container" onclick="addCustomItem(null)">+ 自訂金額</div>
+
+        <div class="settings-area">
+            <div class="setting-row">
+                <span style="font-weight:500">加一服務費 (+10%)</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="service-charge" checked onchange="calculateTotal()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <span style="font-weight:500">用餐人數</span>
+                <div class="qty-control" style="width: 110px;">
+                    <button class="qty-btn" onclick="changePeople(-1)">-</button>
+                    <input type="number" id="people" class="qty-input" value="1" min="1" oninput="calculateTotal()">
+                    <button class="qty-btn" onclick="changePeople(1)">+</button>
+                </div>
+            </div>
+        </div>
+        <div style="height: 20px;"></div>
+    </div>
+</div>
+
+<div class="fixed-footer">
+    <div class="bill-summary">
+        <div class="bill-left">
+            <span class="stats-badge">總碟數: <span id="total-count">0</span></span>
+            <span>小計: <span id="subtotal-txt">$0</span></span>
+            <span id="service-txt" style="font-size: 0.8rem; color:#888;">服務費: $0</span>
+        </div>
+        <div class="bill-right">
+            <span class="stats-badge" style="background:#FEF2F2; color:var(--brand-red);">人均 <span id="avg-count">0</span> 碟</span>
+            <div class="bill-total" id="total-txt">HK$ 0.00</div>
+            <div class="bill-aa">AA制: <span id="aa-txt">$0</span></div>
+        </div>
+    </div>
+    
+    <button class="whatsapp-btn" onclick="sendWhatsApp()">
+        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+        <span>Send WhatsApp 收錢</span>
+    </button>
+</div>
+
+<!-- DISCLAIMER MODAL -->
+<div id="disclaimer-modal" class="modal-overlay" onclick="closeDisclaimer(event)">
+    <div class="modal-content">
+        <span class="modal-close-x" onclick="closeDisclaimer(event, true)">×</span>
+        <div class="disclaimer-text">
+            <h3>免責聲明</h3>
+            <p>本網頁應用程式（下稱「本工具」）由第三方開發者製作，僅供輔助計算用途，與<strong>香港壽司郎 (Sushiro HK)</strong> 無任何官方關係。</p>
+            <ul>
+                <li><strong>非官方工具：</strong> 本工具並非由壽司郎官方發佈。</li>
+                <li><strong>價格僅供參考：</strong> 所有食品價格及服務費計算結果僅供參考。如遇壽司郎調整價格或計算方式，請以店內最終單據（Receipt）為準。</li>
+                <li><strong>計算誤差：</strong> AA制及總額計算可能因四捨五入出現微小誤差。</li>
+                <li><strong>責任豁免：</strong> 開發者不對因使用本工具而產生的任何財務糾紛、損失或資料錯誤負責。</li>
+            </ul>
+            <p style="font-size:0.8rem; color:#999; margin-top:15px; text-align:center;">使用本工具即代表閣下同意上述條款。</p>
+        </div>
+        <button onclick="closeDisclaimer(event, true)" style="width:100%; padding:10px; background:var(--brand-red); color:white; border:none; border-radius:8px; font-weight:bold;">我明白了</button>
+    </div>
+</div>
+
+<script>
+    const platesData = [
+        { id: 'red', name: '紅碟', price: 12 }, { id: 'silver', name: '銀碟', price: 17 },
+        { id: 'gold', name: '金碟', price: 22 }, { id: 'black', name: '黑碟', price: 27 }
+    ];
+    const categories = ['其他', '握壽司', '軍艦・卷物', '麵類・湯類', '副餐類', '甜品・飲料', '嚴選二貫', '外賣自取'];
+
+    const plateContainer = document.getElementById('plate-grid');
+    const customGrid = document.getElementById('custom-grid');
+    const modal = document.getElementById('disclaimer-modal');
+    const toast = document.getElementById('toast');
+
+    // Init Standard Plates
+    platesData.forEach(plate => {
+        const div = document.createElement('div');
+        div.className = `plate-card plate-${plate.id}`;
+        // Click card to add
+        div.onclick = function(e) { changePlateQty(plate.id, 1); };
+
+        div.innerHTML = `
+            <div class="plate-top">
+                <div class="plate-icon"></div>
+                <div class="plate-info">
+                    <div class="plate-name">${plate.name}</div>
+                    <div class="plate-price">$${plate.price}</div>
+                </div>
+            </div>
+            <div class="qty-control">
+                <button class="qty-btn" onclick="event.stopPropagation(); changePlateQty('${plate.id}', -1)">-</button>
+                <input type="number" id="qty-${plate.id}" class="qty-input" value="0" min="0" oninput="calculateTotal()" onclick="event.stopPropagation()">
+                <button class="qty-btn" onclick="event.stopPropagation(); changePlateQty('${plate.id}', 1)">+</button>
+            </div>
+        `;
+        plateContainer.appendChild(div);
+    });
+
+    // Disclaimer
+    function openDisclaimer() { modal.classList.add('show'); }
+    function closeDisclaimer(e, force) { if (force || e.target === modal) modal.classList.remove('show'); }
+
+    // Toast
+    function showToast(message) {
+        toast.textContent = message;
+        toast.className = "show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    // Reset Logic
+    let resetTimer;
+    function handleReset() {
+        const btn = document.querySelector('.floating-reset-btn');
+        const icon = document.getElementById('reset-icon');
+        const text = document.getElementById('reset-text');
+
+        if (btn.classList.contains('confirm')) {
+            // EXECUTE RESET
+            platesData.forEach(p => document.getElementById(`qty-${p.id}`).value = 0);
+            document.getElementById('custom-grid').innerHTML = '';
+            document.getElementById('people').value = 1;
+            calculateTotal();
+            showToast("已重設所有資料 🗑️");
+            
+            // Reset visual state
+            btn.classList.remove('confirm');
+            icon.textContent = '🔄';
+            text.style.display = 'none';
+            clearTimeout(resetTimer);
+        } else {
+            // ASK CONFIRM
+            btn.classList.add('confirm');
+            icon.textContent = '🗑️';
+            text.style.display = 'inline';
+            resetTimer = setTimeout(() => {
+                btn.classList.remove('confirm');
+                icon.textContent = '🔄';
+                text.style.display = 'none';
+            }, 3000);
+        }
+    }
+
+    let customId = 0;
+
+    function addCustomItem(price = null) {
+        if (price !== null) {
+            const priceInputs = Array.from(document.querySelectorAll('.custom-price-input'));
+            const existingInput = priceInputs.find(input => parseFloat(input.value) === price);
+            if (existingInput) {
+                const card = existingInput.closest('.custom-card');
+                const qtyInput = card.querySelector('.qty-input');
+                qtyInput.value = (parseInt(qtyInput.value) || 0) + 1;
+                card.classList.remove('highlight');
+                void card.offsetWidth; 
+                card.classList.add('highlight');
+                setTimeout(() => card.classList.remove('highlight'), 300);
+                calculateTotal();
+                return;
+            }
+        }
+
+        customId++;
+        const div = document.createElement('div');
+        div.className = 'custom-card';
+        div.id = `custom-card-${customId}`;
+        
+        let optionsHtml = '';
+        categories.forEach(cat => { optionsHtml += `<option value="${cat}">${cat}</option>`; });
+        const priceVal = price ? price : '';
+
+        div.innerHTML = `
+            <div class="custom-header">
+                <select class="category-select">${optionsHtml}</select>
+                <span class="delete-x" onclick="removeCustom(${customId})">×</span>
+            </div>
+            <input type="number" class="custom-price-input" placeholder="單價 $" value="${priceVal}" oninput="calculateTotal()" id="price-${customId}">
+            <div class="qty-control">
+                <button class="qty-btn" onclick="changeCustomQty(${customId}, -1)">-</button>
+                <input type="number" class="qty-input" value="1" min="1" id="qty-c-${customId}" oninput="calculateTotal()">
+                <button class="qty-btn" onclick="changeCustomQty(${customId}, 1)">+</button>
+            </div>
+        `;
+        customGrid.appendChild(div);
+        
+        if (!price) {
+            setTimeout(() => document.getElementById(`price-${customId}`).focus(), 100);
+        } else {
+            calculateTotal();
+        }
+    }
+
+    function removeCustom(id) { document.getElementById(`custom-card-${id}`).remove(); calculateTotal(); }
+    function getVal(id) { return parseInt(document.getElementById(id).value) || 0; }
+    
+    function changePlateQty(id, delta) {
+        const el = document.getElementById(`qty-${id}`);
+        el.value = Math.max(0, getVal(`qty-${id}`) + delta);
+        calculateTotal();
+    }
+    function changeCustomQty(id, delta) {
+        const el = document.getElementById(`qty-c-${id}`);
+        el.value = Math.max(1, getVal(`qty-c-${id}`) + delta);
+        calculateTotal();
+    }
+    function changePeople(delta) {
+        const el = document.getElementById('people');
+        el.value = Math.max(1, getVal('people') + delta);
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        let subtotal = 0;
+        let totalItems = 0;
+
+        platesData.forEach(p => {
+            const qty = getVal(`qty-${p.id}`);
+            subtotal += qty * p.price;
+            totalItems += qty;
+        });
+
+        document.querySelectorAll('.custom-card').forEach(card => {
+            const price = parseFloat(card.querySelector('.custom-price-input').value) || 0;
+            const qty = parseInt(card.querySelector('.qty-input').value) || 0;
+            subtotal += price * qty;
+            totalItems += qty;
+        });
+
+        const hasService = document.getElementById('service-charge').checked;
+        const service = (hasService && subtotal > 0) ? subtotal * 0.1 : 0;
+        const total = subtotal + service;
+        const people = Math.max(1, getVal('people'));
+        const avgItems = totalItems / people;
+
+        document.getElementById('subtotal-txt').textContent = `$${subtotal.toFixed(0)}`;
+        document.getElementById('service-txt').textContent = `服務費: $${service.toFixed(1)}`;
+        document.getElementById('total-txt').textContent = `HK$ ${total.toFixed(1)}`;
+        document.getElementById('aa-txt').textContent = `$${(total/people).toFixed(1)}`;
+        
+        document.getElementById('total-count').textContent = totalItems;
+        document.getElementById('avg-count').textContent = isNaN(avgItems) ? '0' : avgItems.toFixed(1);
+
+        document.getElementById('service-txt').style.opacity = service > 0 ? 1 : 0.5;
+        document.getElementById('service-txt').style.textDecoration = service > 0 ? 'none' : 'line-through';
+    }
+
+    function sendWhatsApp() {
+        const people = Math.max(1, getVal('people'));
+        const totalText = document.getElementById('total-txt').textContent;
+        const aaVal = parseFloat(document.getElementById('aa-txt').textContent.replace('$',''));
+        const aaCeil = Math.ceil(aaVal);
+        const totalItems = document.getElementById('total-count').textContent;
+
+        if (aaVal <= 0) { 
+            showToast("請先點餐！🍣");
+            return; 
+        }
+
+        const d = new Date();
+        const dateStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+        const msg = `${dateStr} 壽司郎 ${people}位🍣\n共 ${totalItems} 碟\n總數：*${totalText}*\n每人：👉 *HK$ ${aaCeil}*`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+    
+    window.onload = calculateTotal;
+</script>
+
+</body>
+</html>
