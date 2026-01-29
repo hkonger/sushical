@@ -1,13 +1,3 @@
-if (typeof DISCLAIMER_TEXT === 'undefined') {
-    console.error("Error: content.js not loaded!");
-    var DISCLAIMER_TEXT = {
-        title: "Error",
-        intro: "Content file missing.",
-        listItems: [],
-        footer: ""
-    };
-}
-
 const platesData = [
     { id: 'red', name: '紅碟', price: 12 }, { id: 'silver', name: '銀碟', price: 17 },
     { id: 'gold', name: '金碟', price: 22 }, { id: 'black', name: '黑碟', price: 27 }
@@ -19,22 +9,11 @@ const customGrid = document.getElementById('custom-grid');
 const modal = document.getElementById('disclaimer-modal');
 const toast = document.getElementById('toast');
 
-// --- 1. 初始化免責聲明 ---
-function initDisclaimer() {
-    const container = document.getElementById('disclaimer-body');
-    let html = `<h3>${DISCLAIMER_TEXT.title}</h3>`;
-    html += `<p>${DISCLAIMER_TEXT.intro}</p><ul>`;
-    DISCLAIMER_TEXT.listItems.forEach(item => {
-        html += `<li>${item}</li>`;
-    });
-    html += `</ul><p style="font-size:0.8rem; color:#999; margin-top:15px; text-align:center;">${DISCLAIMER_TEXT.footer}</p>`;
-    container.innerHTML = html;
-}
-
-// --- 2. 初始化標準碟 ---
+// Init Standard Plates
 platesData.forEach(plate => {
     const div = document.createElement('div');
     div.className = `plate-card plate-${plate.id}`;
+    // Click card to add
     div.onclick = function(e) { changePlateQty(plate.id, 1); };
 
     div.innerHTML = `
@@ -54,11 +33,11 @@ platesData.forEach(plate => {
     plateContainer.appendChild(div);
 });
 
-// --- Modal Functions ---
+// Disclaimer
 function openDisclaimer() { modal.classList.add('show'); }
 function closeDisclaimer(e, force) { if (force || e.target === modal) modal.classList.remove('show'); }
 
-// --- Toast Function ---
+// Toast
 function showToast(message) {
     toast.textContent = message;
     toast.className = "show";
@@ -97,8 +76,8 @@ function handleReset() {
 
 // --- TIMER LOGIC ---
 let timerInterval;
-let timerSeconds = 3600; 
-let timerState = 'idle'; 
+let timerSeconds = 3600; // 60 mins
+let timerState = 'idle'; // idle, confirm_start, running, confirm_stop
 let timerTimeout;
 
 function handleTimer() {
@@ -107,6 +86,7 @@ function handleTimer() {
     const text = document.getElementById('timer-text');
 
     if (timerState === 'idle') {
+        // State: Idle -> Confirm Start
         timerState = 'confirm_start';
         btn.classList.add('confirm');
         icon.textContent = '▶️';
@@ -118,6 +98,7 @@ function handleTimer() {
         }, 3000);
 
     } else if (timerState === 'confirm_start') {
+        // State: Confirm Start -> Running
         clearTimeout(timerTimeout);
         timerState = 'running';
         btn.classList.remove('confirm');
@@ -127,6 +108,7 @@ function handleTimer() {
         startCountdown();
 
     } else if (timerState === 'running') {
+        // State: Running -> Confirm Stop
         timerState = 'confirm_stop';
         btn.classList.remove('running');
         btn.classList.add('pause-confirm');
@@ -147,6 +129,7 @@ function handleTimer() {
         }, 3000);
 
     } else if (timerState === 'confirm_stop') {
+        // State: Confirm Stop -> Idle (Actually Stop)
         clearTimeout(timerTimeout);
         clearInterval(timerInterval);
         resetTimerUI();
@@ -169,7 +152,7 @@ function resetTimerUI() {
 }
 
 function startCountdown() {
-    timerSeconds = 60 * 60; 
+    timerSeconds = 60 * 60; // 60 mins
     updateTimerText();
     
     timerInterval = setInterval(() => {
@@ -314,8 +297,4 @@ function sendWhatsApp() {
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// 啟動
-window.onload = function() {
-    initDisclaimer();
-    calculateTotal();
-};
+window.onload = calculateTotal;
