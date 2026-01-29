@@ -293,7 +293,7 @@ function sendWhatsApp() {
 
     const d = new Date();
     const dateStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
-    const msg = `${dateStr} 壽司郎 ${people}位🍣\n共 ${totalItems} 碟\n總數：*${totalText}*\n每人：👉 *HK$ ${aaCeil}*`;
+    const msg = `${dateStr} 壽司郎 ${people}位🍣\n共 ${totalItems} 碟\n總數：*${totalText}*\n每人：*HK$ ${aaCeil}*`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
