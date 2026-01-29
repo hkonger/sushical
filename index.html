@@ -7,23 +7,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --brand-red: #C8102E;
-            --brand-dark: #2D2D2D;
-            --bg-color: #F5F5F7;
+            /* 壽司郎品牌色系 */
+            --brand-red: #C8102E;       /* Logo紅 */
+            --brand-red-dark: #A00D25;  /* 深紅 (按壓態) */
+            --brand-yellow: #FFC107;    /* 亮黃 (強調) */
+            --bg-color: #F9F7F2;        /* 米色背景 (模仿店內氛圍) */
             --card-bg: #FFFFFF;
+            --text-main: #2D2D2D;
+            --text-sub: #666666;
+            
+            /* 功能色 */
             --whatsapp-green: #25D366;
-            --plate-red: #D32F2F;
-            --plate-silver: #9E9E9E;
-            --plate-gold: #FBC02D;
-            --plate-black: #212121;
+            --timer-blue: #0055A4;      /* 深藍 (對比紅) */
+            --timer-orange: #FF9500;
+            
+            /* 碟色 */
+            --plate-red: #D9381E;
+            --plate-silver: #A8A9AD;
+            --plate-gold: #EDAC28;
+            --plate-black: #222222;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Noto Sans TC', sans-serif; }
         
         body {
-            font-family: 'Noto Sans TC', sans-serif;
             background-color: var(--bg-color);
-            color: var(--brand-dark);
+            color: var(--text-main);
             margin: 0;
             height: 100vh;
             display: flex;
@@ -35,90 +44,106 @@
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
+        /* SCROLLABLE AREA */
         .scroll-container {
             flex: 1; overflow-y: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch;
         }
 
-        /* HEADER */
+        /* HEADER - SUSHIRO STYLE */
         header {
-            background-color: var(--card-bg); padding: 12px 20px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 90;
-            border-bottom: 4px solid var(--brand-red);
+            background-color: var(--brand-red); /* 紅底 */
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+            position: sticky; top: 0; z-index: 90;
             display: flex; align-items: center; justify-content: center;
         }
-        header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--brand-red); }
+        header h1 { 
+            margin: 0; font-size: 1.2rem; font-weight: 800; color: white; letter-spacing: 1px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
 
         .header-btn {
-            position: absolute; font-size: 0.8rem; text-decoration: none;
-            color: var(--brand-red); font-weight: 700; border: 1px solid var(--brand-red);
-            padding: 4px 10px; border-radius: 20px; background: white; transition: 0.2s; cursor: pointer;
+            position: absolute; font-size: 0.85rem; text-decoration: none;
+            color: var(--brand-red); font-weight: 700; background: white;
+            border: none; padding: 6px 12px; border-radius: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s; cursor: pointer;
         }
-        .header-btn:active { background: #fff5f5; transform: scale(0.95); }
+        .header-btn:active { transform: scale(0.95); background: #f0f0f0; }
         .menu-link { left: 15px; }
-        .disclaimer-link { right: 15px; color: #666; border-color: #999; }
+        .disclaimer-link { right: 15px; }
 
         .content-wrapper { max-width: 600px; margin: 0 auto; padding: 15px; }
 
-        /* FLOATING RESET BUTTON */
-        .floating-reset-btn {
-            position: fixed;
-            bottom: 140px; /* Above the footer area */
-            right: 20px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent */
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        /* FLOATING BUTTONS */
+        .floating-btn {
+            position: fixed; 
+            bottom: 180px; 
+            width: 50px; height: 50px; border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.4rem; cursor: pointer; z-index: 999;
-            backdrop-filter: blur(5px); /* Blur effect */
+            font-size: 1.5rem; cursor: pointer; z-index: 999;
+            backdrop-filter: blur(4px);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             overflow: hidden; white-space: nowrap;
         }
-        
-        /* Confirm State */
-        .floating-reset-btn.confirm {
-            background-color: rgba(200, 16, 46, 0.95); /* Solid Red */
-            color: white;
-            width: 110px; /* Expand width */
-            border-radius: 30px;
-            font-size: 0.95rem;
-            font-weight: bold;
+
+        /* RESET BUTTON */
+        .reset-btn-float { right: 20px; color: var(--brand-red); }
+        .reset-btn-float.confirm {
+            background-color: var(--brand-red); color: white;
+            width: 120px; border-radius: 30px; font-size: 0.95rem; font-weight: bold;
+            animation: shake 0.3s; box-shadow: 0 4px 15px rgba(200, 16, 46, 0.4);
+        }
+
+        /* TIMER BUTTON */
+        .timer-btn-float { left: 20px; color: var(--timer-blue); }
+        .timer-btn-float.confirm {
+            background-color: var(--timer-blue); color: white;
+            width: 120px; border-radius: 30px; font-size: 0.95rem; font-weight: bold;
             animation: shake 0.3s;
         }
+        .timer-btn-float.running {
+            background-color: white; color: var(--timer-blue); border: 3px solid var(--timer-blue);
+            width: 100px; border-radius: 30px; font-size: 1.1rem; font-weight: 800; font-family: 'Courier New', monospace;
+        }
+        .timer-btn-float.pause-confirm {
+            background-color: var(--timer-orange); color: white; border: none;
+            width: 120px; border-radius: 30px; font-size: 0.95rem; font-weight: bold;
+            animation: shake 0.3s;
+        }
+
         @keyframes shake {
             0% { transform: translateX(0); } 25% { transform: translateX(2px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); }
         }
 
-        /* STANDARD PLATES GRID */
-        #plate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        /* GRIDS */
+        #plate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        #custom-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
 
-        /* CUSTOM ITEMS GRID */
-        #custom-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-
-        /* PLATE CARD */
+        /* PLATE CARD (Tablet Style) */
         .plate-card {
-            background: var(--card-bg); border-radius: 12px; padding: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03); border: 1px solid transparent;
+            background: var(--card-bg); border-radius: 8px; padding: 12px 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08); border: 1px solid #eee;
             display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
-            cursor: pointer; transition: transform 0.1s;
+            cursor: pointer; transition: transform 0.1s; position: relative; overflow: hidden;
         }
-        .plate-card:active { transform: scale(0.97); background-color: #fafafa; }
-        .plate-red { border-left: 4px solid var(--plate-red); }
-        .plate-silver { border-left: 4px solid var(--plate-silver); }
-        .plate-gold { border-left: 4px solid var(--plate-gold); }
-        .plate-black { border-left: 4px solid var(--plate-black); }
+        /* Color Strip on Top */
+        .plate-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+        }
+        .plate-red::before { background: var(--plate-red); }
+        .plate-silver::before { background: var(--plate-silver); }
+        .plate-gold::before { background: var(--plate-gold); }
+        .plate-black::before { background: var(--plate-black); }
 
-        .plate-top { display: flex; align-items: center; width: 100%; gap: 10px; pointer-events: none; }
+        .plate-card:active { transform: scale(0.97); background-color: #fafafa; }
+
+        .plate-top { display: flex; align-items: center; width: 100%; gap: 10px; pointer-events: none; margin-top: 5px; }
         .plate-icon {
-            width: 32px; height: 32px; border-radius: 50%; background: white; flex-shrink: 0;
-            border: 4px solid #ccc; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); position: relative;
-        }
-        .plate-icon::after {
-            content: ''; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); width: 60%; height: 60%;
-            border-radius: 50%; border: 1px solid rgba(0,0,0,0.1);
+            width: 36px; height: 36px; border-radius: 50%; background: white; flex-shrink: 0;
+            border: 5px solid #ccc; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); 
         }
         .plate-red .plate-icon { border-color: var(--plate-red); }
         .plate-silver .plate-icon { border-color: var(--plate-silver); }
@@ -126,97 +151,109 @@
         .plate-black .plate-icon { border-color: var(--plate-black); }
 
         .plate-info { text-align: left; line-height: 1.2; }
-        .plate-name { font-weight: 700; font-size: 0.95rem; }
-        .plate-price { font-size: 0.85rem; color: #666; font-weight: 500; }
+        .plate-name { font-weight: 800; font-size: 1rem; color: var(--text-main); }
+        .plate-price { font-size: 0.9rem; color: var(--text-sub); font-weight: 600; }
 
+        /* QTY CONTROLS (Buttons) */
         .qty-control {
-            display: flex; align-items: center; background: #F0F0F0;
-            border-radius: 20px; padding: 2px; width: 100%; justify-content: space-between;
+            display: flex; align-items: center; background: #fff;
+            border: 1px solid #ddd; border-radius: 6px; padding: 2px; width: 100%; justify-content: space-between;
         }
         .qty-btn {
-            width: 28px; height: 28px; border: none; background: white;
-            border-radius: 50%; font-size: 1.1rem; color: var(--brand-red);
-            font-weight: bold; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            display: flex; align-items: center; justify-content: center; padding: 0;
+            width: 28px; height: 28px; border: none; background: #eee;
+            border-radius: 4px; font-size: 1.2rem; color: var(--text-main);
+            font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .qty-btn:active { background: #eee; }
+        .qty-btn:active { background: #ddd; color: var(--brand-red); }
         .qty-input {
             width: 30px; text-align: center; background: transparent; border: none;
-            font-size: 1.1rem; font-weight: 700; color: var(--brand-dark); padding: 0;
+            font-size: 1.1rem; font-weight: 800; color: var(--brand-red); padding: 0;
         }
 
-        /* CUSTOM CARD */
+        /* CUSTOM CARD (Compact) */
         .custom-card {
-            background: white; border-radius: 10px; padding: 6px; border: 1px solid #eee;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03); 
+            background: white; border-radius: 8px; padding: 6px; border: 1px solid #eee;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
             display: flex; flex-direction: column; gap: 4px; 
             animation: popIn 0.3s; transition: background-color 0.2s;
         }
-        .custom-card.highlight { background-color: #fff9c4; border-color: #fbc02d; }
+        .custom-card.highlight { background-color: #FFF8E1; border-color: var(--brand-yellow); }
         @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
         .custom-header { display: flex; justify-content: space-between; align-items: center; height: 20px;}
         .category-select {
             border: none; background: transparent; font-size: 0.75rem; 
-            font-weight: 700; color: var(--brand-red); width: 85%;
+            font-weight: 700; color: var(--text-sub); width: 85%;
             padding: 0; outline: none; -webkit-appearance: none;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .custom-price-input { 
             width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 2px; 
-            text-align: center; font-weight: 700; font-size: 0.95rem; color: #333;
+            text-align: center; font-weight: 700; font-size: 0.95rem; color: var(--brand-red);
         }
-        .custom-card .qty-control { height: 26px; border-radius: 13px; }
-        .custom-card .qty-btn { width: 22px; height: 22px; font-size: 0.9rem; }
-        .custom-card .qty-input { font-size: 0.95rem; width: 24px; }
+        .custom-card .qty-control { height: 26px; border: none; background: transparent;}
+        .custom-card .qty-btn { width: 22px; height: 22px; font-size: 0.9rem; background: #f0f0f0; }
+        .custom-card .qty-input { font-size: 0.95rem; width: 24px; color: var(--text-main); }
         .delete-x { font-size: 1.2rem; line-height: 1; color: #ccc; cursor: pointer; padding-left: 2px;}
-        .delete-x:hover { color: red; }
+        .delete-x:hover { color: var(--brand-red); }
 
-        /* PRESET CHIPS */
-        .preset-title { font-size: 0.85rem; color: #888; font-weight: 700; margin: 20px 0 8px 5px; }
+        /* PRESET CHIPS (Menu Style) */
+        .preset-title { 
+            font-size: 0.9rem; color: var(--brand-red); font-weight: 800; 
+            margin: 25px 0 10px 5px; border-left: 4px solid var(--brand-yellow); padding-left: 8px;
+        }
         .preset-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 25px;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 25px;
         }
         .preset-btn {
-            background: white; border: 1px solid #ddd; border-radius: 6px; padding: 8px 0;
-            text-align: center; font-weight: 700; color: #555; font-size: 0.9rem;
-            cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.1s;
+            background: white; border: 1px solid #ddd; border-radius: 6px; padding: 10px 0;
+            text-align: center; font-weight: 800; color: var(--text-main); font-size: 0.95rem;
+            cursor: pointer; box-shadow: 0 2px 0 #eee; transition: 0.1s;
         }
-        .preset-btn:active { background: #ffebee; border-color: var(--brand-red); color: var(--brand-red); transform: scale(0.95); }
+        .preset-btn:active { 
+            background: #fff0f0; border-color: var(--brand-red); 
+            color: var(--brand-red); transform: translateY(2px); box-shadow: none; 
+        }
 
         .add-btn-container {
-            border: 2px dashed #ccc; border-radius: 12px; padding: 12px;
-            text-align: center; color: #888; font-weight: 600; cursor: pointer;
-            margin-top: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.5); transition: 0.2s; font-size: 0.9rem;
+            border: 2px dashed #ddd; border-radius: 8px; padding: 12px;
+            text-align: center; color: #999; font-weight: 600; cursor: pointer;
+            margin-top: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.6); transition: 0.2s; font-size: 0.9rem;
         }
-        .add-btn-container:active { background: #eee; transform: scale(0.98); }
+        .add-btn-container:active { background: #eee; border-color: #bbb; }
 
-        /* SETTINGS */
-        .settings-area { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        /* SETTINGS CARD */
+        .settings-area { 
+            background: white; border-radius: 8px; padding: 15px; margin-bottom: 20px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--brand-red);
+        }
         .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        
+        /* Sushiro Checkbox Toggle */
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
         input:checked + .slider { background-color: var(--brand-red); }
-        input:checked + .slider:before { transform: translateX(18px); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
-        /* FIXED FOOTER */
+        /* FIXED FOOTER (Receipt Style) */
         .fixed-footer {
-            flex-shrink: 0; background: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            flex-shrink: 0; background: white; 
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
             padding: 12px 20px; border-top: 1px solid #eee; z-index: 100;
         }
         .bill-summary { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
         .bill-left { font-size: 0.85rem; color: #666; display: flex; flex-direction: column; gap: 2px; }
         .bill-right { text-align: right; }
-        .bill-total { font-size: 1.4rem; font-weight: 800; color: var(--brand-red); line-height: 1.1; }
-        .bill-aa { font-size: 0.95rem; font-weight: 600; color: var(--brand-dark); margin-top: 4px; }
+        .bill-total { font-size: 1.5rem; font-weight: 900; color: var(--brand-red); line-height: 1.1; }
+        .bill-aa { font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-top: 4px; }
         .stats-badge { display: inline-block; background: #eee; color: #555; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; margin-bottom: 3px; }
 
         .whatsapp-btn {
             width: 100%; background-color: var(--whatsapp-green); color: white;
-            border: none; padding: 12px; border-radius: 50px; font-size: 1rem;
+            border: none; padding: 12px; border-radius: 50px; font-size: 1.05rem;
             font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);
         }
 
         /* MODAL */
@@ -226,27 +263,36 @@
             display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;
         }
         .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-content { background: white; width: 85%; max-width: 400px; border-radius: 16px; padding: 25px; position: relative; }
-        .modal-close-x { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: #999; cursor: pointer; }
+        .modal-content { 
+            background: white; width: 85%; max-width: 400px; border-radius: 12px; padding: 25px; 
+            position: relative; border-top: 5px solid var(--brand-red);
+        }
+        .modal-close-x { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; color: #999; cursor: pointer; line-height: 1;}
         .disclaimer-text { font-size: 0.9rem; line-height: 1.6; color: #444; margin-bottom: 15px; }
-        .disclaimer-text h3 { color: var(--brand-red); margin-top: 0; }
+        .disclaimer-text h3 { color: var(--brand-red); margin-top: 0; text-align: center; }
         .disclaimer-text ul { padding-left: 20px; margin-bottom: 0; }
         .disclaimer-text li { margin-bottom: 8px; }
 
         /* TOAST */
         #toast {
-            visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center;
-            border-radius: 50px; padding: 12px; position: fixed; z-index: 9999;
+            visibility: hidden; min-width: 200px; background-color: rgba(45, 45, 45, 0.95); color: #fff; text-align: center;
+            border-radius: 50px; padding: 12px 20px; position: fixed; z-index: 9999;
             left: 50%; bottom: 120px; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-weight: 600; font-size: 0.95rem;
         }
         #toast.show { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body>
 
-<!-- FLOATING RESET BUTTON -->
-<div class="floating-reset-btn" onclick="handleReset()">
+<!-- FLOATING TIMER BUTTON (Left) -->
+<div class="floating-btn timer-btn-float" onclick="handleTimer()">
+    <span id="timer-icon">⏱️</span>
+    <span id="timer-text" style="display:none; margin-left:5px;"></span>
+</div>
+
+<!-- FLOATING RESET BUTTON (Right) -->
+<div class="floating-btn reset-btn-float" onclick="handleReset()">
     <span id="reset-icon">🔄</span>
     <span id="reset-text" style="display:none; margin-left:5px;">確定清空?</span>
 </div>
@@ -257,7 +303,7 @@
 <div class="scroll-container">
     <header>
         <a href="https://sushirohk.com.hk/tc/menu.php?wid=5&cid=13" target="_blank" class="header-btn menu-link">📝 菜單</a>
-        <h1>🍣 SUSHIRO 計算機</h1>
+        <h1>🍣 SUSHIRO</h1>
         <div class="header-btn disclaimer-link" onclick="openDisclaimer()">⚠️ 免責</div>
     </header>
 
@@ -266,7 +312,7 @@
         <div id="plate-grid"></div>
 
         <!-- Price Presets -->
-        <div class="preset-title">快速加入餐點</div>
+        <div class="preset-title">快速點餐</div>
         <div class="preset-grid">
             <button class="preset-btn" onclick="addCustomItem(10)">$10</button>
             <button class="preset-btn" onclick="addCustomItem(13)">$13</button>
@@ -284,18 +330,18 @@
         <div id="custom-grid"></div>
 
         <!-- Manual Add Button -->
-        <div class="add-btn-container" onclick="addCustomItem(null)">+ 自訂金額</div>
+        <div class="add-btn-container" onclick="addCustomItem(null)">+ 加入自訂金額</div>
 
         <div class="settings-area">
             <div class="setting-row">
-                <span style="font-weight:500">加一服務費 (+10%)</span>
+                <span style="font-weight:700; color:var(--text-main);">加一服務費 (+10%)</span>
                 <label class="toggle-switch">
                     <input type="checkbox" id="service-charge" checked onchange="calculateTotal()">
                     <span class="slider"></span>
                 </label>
             </div>
             <div class="setting-row">
-                <span style="font-weight:500">用餐人數</span>
+                <span style="font-weight:700; color:var(--text-main);">用餐人數</span>
                 <div class="qty-control" style="width: 110px;">
                     <button class="qty-btn" onclick="changePeople(-1)">-</button>
                     <input type="number" id="people" class="qty-input" value="1" min="1" oninput="calculateTotal()">
@@ -310,12 +356,12 @@
 <div class="fixed-footer">
     <div class="bill-summary">
         <div class="bill-left">
-            <span class="stats-badge">總碟數: <span id="total-count">0</span></span>
+            <span class="stats-badge">總數: <span id="total-count">0</span> 碟</span>
             <span>小計: <span id="subtotal-txt">$0</span></span>
             <span id="service-txt" style="font-size: 0.8rem; color:#888;">服務費: $0</span>
         </div>
         <div class="bill-right">
-            <span class="stats-badge" style="background:#FEF2F2; color:var(--brand-red);">人均 <span id="avg-count">0</span> 碟</span>
+            <span class="stats-badge" style="background:#FFF0F0; color:var(--brand-red);">人均 <span id="avg-count">0</span> 碟</span>
             <div class="bill-total" id="total-txt">HK$ 0.00</div>
             <div class="bill-aa">AA制: <span id="aa-txt">$0</span></div>
         </div>
@@ -333,16 +379,14 @@
         <span class="modal-close-x" onclick="closeDisclaimer(event, true)">×</span>
         <div class="disclaimer-text">
             <h3>免責聲明</h3>
-            <p>本網頁應用程式（下稱「本工具」）由第三方開發者製作，僅供輔助計算用途，與<strong>香港壽司郎 (Sushiro HK)</strong> 無任何官方關係。</p>
+            <p>本工具僅供輔助計算，與<strong>香港壽司郎 (Sushiro HK)</strong> 無官方關係。</p>
             <ul>
-                <li><strong>非官方工具：</strong> 本工具並非由壽司郎官方發佈。</li>
-                <li><strong>價格僅供參考：</strong> 所有食品價格及服務費計算結果僅供參考。如遇壽司郎調整價格或計算方式，請以店內最終單據（Receipt）為準。</li>
-                <li><strong>計算誤差：</strong> AA制及總額計算可能因四捨五入出現微小誤差。</li>
-                <li><strong>責任豁免：</strong> 開發者不對因使用本工具而產生的任何財務糾紛、損失或資料錯誤負責。</li>
+                <li>價格及服務費計算結果僅供參考。</li>
+                <li>請以店內最終單據（Receipt）為準。</li>
+                <li>開發者不對任何財務損失或資料錯誤負責。</li>
             </ul>
-            <p style="font-size:0.8rem; color:#999; margin-top:15px; text-align:center;">使用本工具即代表閣下同意上述條款。</p>
         </div>
-        <button onclick="closeDisclaimer(event, true)" style="width:100%; padding:10px; background:var(--brand-red); color:white; border:none; border-radius:8px; font-weight:bold;">我明白了</button>
+        <button onclick="closeDisclaimer(event, true)" style="width:100%; padding:12px; background:var(--brand-red); color:white; border:none; border-radius:8px; font-weight:bold; font-size:1rem;">我明白了</button>
     </div>
 </div>
 
@@ -393,28 +437,25 @@
         setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
     }
 
-    // Reset Logic
+    // --- RESET LOGIC ---
     let resetTimer;
     function handleReset() {
-        const btn = document.querySelector('.floating-reset-btn');
+        const btn = document.querySelector('.reset-btn-float');
         const icon = document.getElementById('reset-icon');
         const text = document.getElementById('reset-text');
 
         if (btn.classList.contains('confirm')) {
-            // EXECUTE RESET
             platesData.forEach(p => document.getElementById(`qty-${p.id}`).value = 0);
             document.getElementById('custom-grid').innerHTML = '';
             document.getElementById('people').value = 1;
             calculateTotal();
             showToast("已重設所有資料 🗑️");
             
-            // Reset visual state
             btn.classList.remove('confirm');
             icon.textContent = '🔄';
             text.style.display = 'none';
             clearTimeout(resetTimer);
         } else {
-            // ASK CONFIRM
             btn.classList.add('confirm');
             icon.textContent = '🗑️';
             text.style.display = 'inline';
@@ -426,6 +467,104 @@
         }
     }
 
+    // --- TIMER LOGIC ---
+    let timerInterval;
+    let timerSeconds = 3600; // 60 mins
+    let timerState = 'idle'; // idle, confirm_start, running, confirm_stop
+    let timerTimeout;
+
+    function handleTimer() {
+        const btn = document.querySelector('.timer-btn-float');
+        const icon = document.getElementById('timer-icon');
+        const text = document.getElementById('timer-text');
+
+        if (timerState === 'idle') {
+            timerState = 'confirm_start';
+            btn.classList.add('confirm');
+            icon.textContent = '▶️';
+            text.textContent = '確定計時?';
+            text.style.display = 'inline';
+
+            timerTimeout = setTimeout(() => {
+                if(timerState === 'confirm_start') resetTimerUI();
+            }, 3000);
+
+        } else if (timerState === 'confirm_start') {
+            clearTimeout(timerTimeout);
+            timerState = 'running';
+            btn.classList.remove('confirm');
+            btn.classList.add('running');
+            icon.style.display = 'none';
+            text.style.marginLeft = '0';
+            startCountdown();
+
+        } else if (timerState === 'running') {
+            timerState = 'confirm_stop';
+            btn.classList.remove('running');
+            btn.classList.add('pause-confirm');
+            icon.style.display = 'inline';
+            icon.textContent = '⏸️';
+            text.style.marginLeft = '5px';
+            text.textContent = '確定停止?';
+
+            timerTimeout = setTimeout(() => {
+                if(timerState === 'confirm_stop') {
+                    timerState = 'running';
+                    btn.classList.remove('pause-confirm');
+                    btn.classList.add('running');
+                    icon.style.display = 'none';
+                    text.style.marginLeft = '0';
+                    updateTimerText(); 
+                }
+            }, 3000);
+
+        } else if (timerState === 'confirm_stop') {
+            clearTimeout(timerTimeout);
+            clearInterval(timerInterval);
+            resetTimerUI();
+            showToast("已停止計時 ⏹️");
+        }
+    }
+
+    function resetTimerUI() {
+        const btn = document.querySelector('.timer-btn-float');
+        const icon = document.getElementById('timer-icon');
+        const text = document.getElementById('timer-text');
+        
+        timerState = 'idle';
+        btn.classList.remove('confirm', 'running', 'pause-confirm');
+        icon.style.display = 'inline';
+        icon.textContent = '⏱️';
+        text.style.display = 'none';
+        text.style.marginLeft = '5px';
+        text.textContent = '';
+    }
+
+    function startCountdown() {
+        timerSeconds = 60 * 60; // 60 mins
+        updateTimerText();
+        
+        timerInterval = setInterval(() => {
+            timerSeconds--;
+            if (timerState === 'running') {
+                updateTimerText();
+            }
+            if (timerSeconds <= 0) {
+                clearInterval(timerInterval);
+                showToast("用餐時間到！⏰");
+                resetTimerUI();
+            }
+        }, 1000);
+    }
+
+    function updateTimerText() {
+        const mins = Math.floor(timerSeconds / 60);
+        const secs = timerSeconds % 60;
+        const text = document.getElementById('timer-text');
+        text.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // --- CALCULATOR LOGIC ---
     let customId = 0;
 
     function addCustomItem(price = null) {
